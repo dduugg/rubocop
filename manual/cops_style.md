@@ -3368,7 +3368,7 @@ Enabled | Yes | Yes  | 0.11 | 0.62
 This cop checks for use of `extend self` or `module_function` in a
 module.
 
-Supported styles are: module_function, extend_self.
+Supported styles are: module_function, extend_self, none.
 
 These offenses are not auto-corrected since there are different
 implications to each approach.
@@ -3400,6 +3400,21 @@ module Test
 end
 
 # good
+module Test
+  extend self
+  # ...
+end
+```
+#### EnforcedStyle: none
+
+```ruby
+# bad
+module Test
+  module_function
+  # ...
+end
+
+# bad
 module Test
   extend self
   # ...
