@@ -3460,11 +3460,14 @@ Style/ModuleFunction:
   StyleGuide: '#module-function'
   Enabled: true
   VersionAdded: '0.11'
-  VersionChanged: '0.53'
+  VersionChanged: '0.62'
   EnforcedStyle: module_function
+#  AutoCorrect: false
+#  SafeAutoCorrect: false
   SupportedStyles:
     - module_function
     - extend_self
+    - none
 
 Style/MultilineBlockChain:
   Description: 'Avoid multi-line chains of blocks.'

@@ -3363,7 +3363,7 @@ end
 
 Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
 --- | --- | --- | --- | ---
-Enabled | Yes | Yes  | 0.11 | 0.53
+Enabled | Yes | Yes  | 0.11 | 0.62
 
 This cop checks for use of `extend self` or `module_function` in a
 module.
@@ -3410,7 +3410,7 @@ end
 
 Name | Default value | Configurable values
 --- | --- | ---
-EnforcedStyle | `module_function` | `module_function`, `extend_self`
+EnforcedStyle | `module_function` | `module_function`, `extend_self`, `none`
 
 ### References
 
