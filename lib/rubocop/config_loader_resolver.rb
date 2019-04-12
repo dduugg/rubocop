@@ -86,7 +86,10 @@ module RuboCop
       keys_appearing_in_both = base_hash.keys & derived_hash.keys
       keys_appearing_in_both.each do |key|
         if base_hash[key].is_a?(Hash)
+          # Hashes with nil values are used to unset keys in inherited hashes.
+          keys_to_rm = derived_hash[key].select { |_, v| v.nil? }.map(&:first)
           result[key] = merge(base_hash[key], derived_hash[key], **opts)
+                        .delete_if { |k, _| keys_to_rm.include?(k) }
         elsif should_union?(base_hash, key, opts[:inherit_mode])
           result[key] = base_hash[key] | derived_hash[key]
         elsif opts[:debug]
