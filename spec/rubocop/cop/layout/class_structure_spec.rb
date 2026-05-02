@@ -606,4 +606,101 @@ RSpec.describe RuboCop::Cop::Layout::ClassStructure, :config do
       RUBY
     end
   end
+
+  context 'with AttachedMethods configured' do
+    let(:config) do
+      RuboCop::Config.new(
+        'Layout/ClassStructure' => {
+          'ExpectedOrder' => %w[public_class_methods public_methods],
+          'Categories' => {},
+          'AttachedMethods' => %w[sig]
+        }
+      )
+    end
+
+    it 'does not register an offense when order is correct' do
+      expect_no_offenses(<<~RUBY)
+        class Foo
+          sig { params(teams: T::Array[Team]).returns(T::Array[String]) }
+          def self.validation_errors(teams); end
+
+          sig { returns(String) }
+          def name; end
+        end
+      RUBY
+    end
+
+    it 'registers an offense and moves the method with its attached sig block' do
+      expect_offense(<<~RUBY)
+        class Foo
+          sig { returns(String) }
+          def name; end
+
+          sig { params(teams: T::Array[Team]).returns(T::Array[String]) }
+          def self.validation_errors(teams); end
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `public_class_methods` is supposed to appear before `public_methods`.
+        end
+      RUBY
+
+      expect_correction(<<~RUBY)
+        class Foo
+          sig { params(teams: T::Array[Team]).returns(T::Array[String]) }
+          def self.validation_errors(teams); end
+          sig { returns(String) }
+          def name; end
+
+        end
+      RUBY
+    end
+
+    it 'moves a method with its attached sig when a comment precedes the sig' do
+      expect_offense(<<~RUBY)
+        class Foo
+          sig { returns(String) }
+          def name; end
+
+          # Validates the teams.
+          sig { params(teams: T::Array[Team]).returns(T::Array[String]) }
+          def self.validation_errors(teams); end
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `public_class_methods` is supposed to appear before `public_methods`.
+        end
+      RUBY
+
+      expect_correction(<<~RUBY)
+        class Foo
+          # Validates the teams.
+          sig { params(teams: T::Array[Team]).returns(T::Array[String]) }
+          def self.validation_errors(teams); end
+          sig { returns(String) }
+          def name; end
+
+        end
+      RUBY
+    end
+
+    it 'does not treat a sig as attached when separated by a blank line' do
+      expect_offense(<<~RUBY)
+        class Foo
+          sig { returns(String) }
+          def name; end
+
+          sig { params(teams: T::Array[Team]).returns(T::Array[String]) }
+
+          def self.validation_errors(teams); end
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `public_class_methods` is supposed to appear before `public_methods`.
+        end
+      RUBY
+
+      expect_correction(<<~RUBY)
+        class Foo
+          def self.validation_errors(teams); end
+          sig { returns(String) }
+          def name; end
+
+          sig { params(teams: T::Array[Team]).returns(T::Array[String]) }
+
+        end
+      RUBY
+    end
+  end
 end

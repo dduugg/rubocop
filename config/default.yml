@@ -506,6 +506,10 @@ Layout/ClassStructure:
   SafeAutoCorrect: false
   VersionAdded: '0.52'
   VersionChanged: '1.53'
+  # Method names whose calls immediately preceding a method definition should be
+  # moved together with that method when autocorrecting. Useful for DSL decorators
+  # that must directly precede their method, such as Sorbet's `sig`.
+  AttachedMethods: []
   Categories:
     module_inclusion:
       - include

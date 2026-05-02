@@ -352,7 +352,36 @@ module RuboCop
             first_comment = comment if whole_line_comment_at_line?(annotation_line)
           end
 
+          # If the immediately preceding sibling is a configured attached method
+          # (e.g. a Sorbet `sig` block), extend the range backward to include it
+          # so the attachment moves together with the method.
+          preceding = preceding_attached_method(node, first_comment)
+          return begin_pos_with_comment(preceding) if preceding
+
           start_line_position(first_comment || node)
+        end
+
+        def preceding_attached_method(node, first_comment)
+          return nil if attached_method_names.empty?
+
+          preceding = node.left_siblings.last
+          return nil unless preceding&.respond_to?(:type) && attached_method?(preceding)
+
+          reference_line = first_comment ? first_comment.loc.line : node.first_line
+          preceding.loc.last_line >= reference_line - 1 ? preceding : nil
+        end
+
+        def attached_method?(node)
+          method_name = case node.type
+                        when :block then node.send_node.method_name.to_s
+                        when :send then node.method_name.to_s
+                        else return false
+                        end
+          attached_method_names.include?(method_name)
+        end
+
+        def attached_method_names
+          cop_config.fetch('AttachedMethods', [])
         end
 
         def whole_line_comment_at_line?(line)
